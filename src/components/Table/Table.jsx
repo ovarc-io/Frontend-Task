@@ -1,12 +1,14 @@
 import { useReactTable, getCoreRowModel, getSortedRowModel, getPaginationRowModel, flexRender } from '@tanstack/react-table';
 import { useMemo, useState, useRef, useEffect } from 'react';
 
+
 export default function Table({ data, columns,onRowClick}) {
   const [rowSelection, setRowSelection] = useState({});
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10
   });
+
   const [sorting, setSorting] = useState([]);
   
   // Add skip reset ref

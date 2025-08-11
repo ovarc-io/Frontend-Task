@@ -5,10 +5,10 @@ import BooksTable from '../components/BooksTable';
 import { useSearchParams } from 'react-router-dom';
 import Modal from '../components/Modal';
 
-const Books = () => {
-  const [books, setBooks] = useState([]);
+const Books = ({ books: externalBooks = [], hideAddBook = false , showPrice = false, editPriceMode = false}) => {
+  const [books, setBooks] = useState(externalBooks);
   const [authors, setAuthors] = useState([]);
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams, _] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
   const [editingRowId, setEditingRowId] = useState(null);
   const [editName, setEditName] = useState('');
@@ -26,17 +26,32 @@ const Books = () => {
   }, [searchParams]);
 
   // Fetch data
-  useEffect(() => {
+useEffect(() => {
+  if (externalBooks && externalBooks.length > 0) {
+    // only fetch authors
+    fetch('/data/authors.json')
+      .then((res) => res.json())
+      .then((data) => setAuthors(data))
+      .catch(console.error);
+  } else {
+    // fetch both books and authors
     Promise.all([
-      fetch('/data/books.json').then((response) => response.json()),
-      fetch('/data/authors.json').then((response) => response.json()),
+      fetch('/data/books.json').then((res) => res.json()),
+      fetch('/data/authors.json').then((res) => res.json()),
     ])
       .then(([booksData, authorsData]) => {
-        setBooks(Array.isArray(booksData) ? booksData : [booksData]);
-        setAuthors(Array.isArray(authorsData) ? authorsData : [authorsData]);
+        setBooks(booksData);
+        setAuthors(authorsData);
       })
-      .catch((error) => console.error('Error fetching data:', error));
-  }, []);
+      .catch(console.error);
+  }
+}, [externalBooks]);
+
+useEffect(() => {
+  if (externalBooks && externalBooks.length > 0) {
+    setBooks(externalBooks);
+  }
+}, [externalBooks]);
 
   // Filter books based on search
   const filteredBooks = books.filter((book) => {
@@ -77,7 +92,7 @@ const Books = () => {
 
   return (
     <div className="py-6">
-      <Header addNew={() => setShowModal(true)} title="Books List" />
+      {!hideAddBook && <Header addNew={() => setShowModal(true)} title="Books List" />}
       {books.length > 0 ? (
         <BooksTable
           books={filteredBooks}
@@ -88,6 +103,8 @@ const Books = () => {
           setEditName={setEditName}
           setBooks={setBooks}
           deleteBook={deleteBook}
+          showPrice ={showPrice}
+          editPriceMode = {editPriceMode}
         />
       ) : (
         <Loading />

@@ -2,8 +2,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Suspense, lazy } from 'react';
 import Layout from './components/Layout';
 import Loading from './pages/Loading';
+import { AuthProvider } from './context/AuthContext';
 
-// Lazy load components for route-based code splitting
 const Home = lazy(() => import('./pages/Home'));
 const Stores = lazy(() => import('./pages/Stores'));
 const Books = lazy(() => import('./pages/Books'));
@@ -13,25 +13,28 @@ const StoreInventory = lazy(() => import('./pages/StoreInventory'));
 const BrowseBooks = lazy(() => import('./pages/BrowseBooks'));
 const BrowseAuthors = lazy(() => import('./pages/BrowseAuthors'));
 const BrowseStores = lazy(() => import('./pages/BrowseStores'));
+
 function App() {
   return (
-    <Router>
-      <Suspense fallback={<Loading />}>
-        <Routes>
-          <Route element={<Layout />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/stores" element={<Stores />} />
-            <Route path="/books" element={<Books />} />
-            <Route path="/author" element={<Authors />} />
-            <Route path="/store/:storeId" element={<StoreInventory />} />
-            <Route path="/browsebooks" element={<BrowseBooks />} />
-            <Route path="/browseauthors" element={<BrowseAuthors />} />
-            <Route path="/browsestores" element={<BrowseStores />} />
-            <Route path="*" element={<NotFound />} />
-          </Route>
-        </Routes>
-      </Suspense>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Suspense fallback={<Loading />}>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/stores" element={<Stores />} />
+              <Route path="/books" element={<Books />} />
+              <Route path="/author" element={<Authors />} />
+              <Route path="/store/:storeId" element={<StoreInventory />} />
+              <Route path="/browsebooks" element={<BrowseBooks />} />
+              <Route path="/browseauthors" element={<BrowseAuthors />} />
+              <Route path="/browsestores" element={<BrowseStores />} />
+              <Route path="*" element={<NotFound />} />
+            </Route>
+          </Routes>
+        </Suspense>
+      </Router>
+    </AuthProvider>
   );
 }
 

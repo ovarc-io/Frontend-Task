@@ -2,11 +2,23 @@
 import { useEffect, useState } from 'react';
 import Modal from '../components/Modal';
 import Header from '../components/Header';
+import Books from '../pages/Books';
 
 const Inventory = () => {
   // State for UI
   const [activeTab, setActiveTab] = useState('books');
   const [showModal, setShowModal] = useState(false);
+    const [books, setBooks] = useState([]);
+  
+
+  useEffect(() => {
+  fetch('/data/booksPrices.json')
+    .then((response) => response.json())
+    .then((booksData) => {
+      setBooks(Array.isArray(booksData) ? booksData : [booksData]);
+    })
+    .catch((error) => console.error('Error fetching books:', error));
+}, []);
 
   // Set active tab based on view query param
   const view = 'books';
@@ -42,7 +54,7 @@ const Inventory = () => {
       <Header addNew={openModal} title={`Store Inventory`} buttonTitle="Add to inventory" />
 
       {activeTab === 'books' ? (
-          <p className="text-gray-600">No books found in this store.</p>
+          <Books books={books} showPrice editPriceMode hideAddBook/>
       ) : (
           <p className="text-gray-600">No authors with books in this store.</p>
       )}

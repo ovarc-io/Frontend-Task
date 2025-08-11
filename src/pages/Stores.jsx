@@ -1,23 +1,22 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Header from '../components/Header';
 import Loading from './Loading';
 import Table from '../components/Table/Table';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import Modal from '../components/Modal';
 import TableActions from '../components/ActionButton/TableActions';
-import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext'; // Adjust path if needed
 
 const Stores = () => {
+  const { user } = useAuth(); // Get signed-in user (null if not signed in)
   const navigate = useNavigate();
-  
 
   const handleViewStoreInventory = (storeId) => {
     navigate(`/store/${storeId}`);
-  };  
+  };
 
-  // State declarations
   const [stores, setStores] = useState([]);
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
   const [editingRowId, setEditingRowId] = useState(null);
   const [editName, setEditName] = useState('');
@@ -26,7 +25,6 @@ const Stores = () => {
     name: '',
     address: '',
   });
-
   // Sync search term with URL query parameters
   useEffect(() => {
     const search = searchParams.get('search') || '';
@@ -38,13 +36,13 @@ const Stores = () => {
     fetch('/data/stores.json')
       .then((response) => response.json())
       .then((data) => {
-        console.log('Fetched stores:', data);
+      console.log('Fetched stores:', data);
         setStores(Array.isArray(data) ? data : [data]);
       })
       .catch((error) => console.error('Error fetching stores:', error));
   }, []);
 
-  // Enrich stores with computed address and filter based on search term
+    // Enrich stores with computed address and filter based on search term
   const filteredStores = useMemo(() => {
     const enrichedStores = stores.map((store) => ({
       ...store,
@@ -61,9 +59,9 @@ const Stores = () => {
     );
   }, [stores, searchTerm]);
 
-  // Define table columns
-  const columns = useMemo(
-    () => [
+  // Define columns conditionally based on user sign in
+  const columns = useMemo(() => {
+    const baseColumns = [
       { header: 'Store Id', accessorKey: 'id' },
       {
         header: 'Name',
@@ -86,7 +84,10 @@ const Stores = () => {
           ),
       },
       { header: 'Address', accessorKey: 'full_address' },
-      {
+    ];
+
+    if (user) {
+      baseColumns.push({
         header: 'Actions',
         id: 'actions',
         cell: ({ row }) => (
@@ -100,12 +101,14 @@ const Stores = () => {
             onDelete={() => deleteStore(row.original.id, row.original.name)}
           />
         ),
-      },
-    ],
-    [editingRowId, editName]
-  );
+      });
+    }
 
-  // Handle store deletion
+    return baseColumns;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editingRowId, editName, user]);
+
+    // Handle store deletion
   const deleteStore = (id, name) => {
     if (window.confirm(`Are you sure you want to delete "${name}"?`)) {
       setStores((prevStores) => prevStores.filter((store) => store.id !== id));
@@ -147,7 +150,7 @@ const Stores = () => {
     });
   };
 
-  // Parse address to extract address_1, address_2, city, state, and zip
+ // Parse address to extract address_1, address_2, city, state, and zip
   const parseAddress = (address) => {
     if (!address || address.trim() === '') {
       return { address_1: '', address_2: '', city: '', state: '', zip: '' };
@@ -155,8 +158,8 @@ const Stores = () => {
 
     // Split the address by commas
     const parts = address.split(',').map((part) => part.trim());
-
-
+    
+    
     if (parts.length < 3) {
       return { address_1: address, address_2: '', city: '', state: '', zip: '' };
     }
@@ -182,8 +185,8 @@ const Stores = () => {
     return { address_1, address_2, city, state, zip };
   };
 
-  // Add new store
-  const handleAddNew = () => {
+// Add new store
+const handleAddNew = () => {
     if (newStore.name.trim() === '' || newStore.address.trim() === '') {
       alert('Store Name and Address are required');
       return;
@@ -217,10 +220,11 @@ const Stores = () => {
   };
   const onRowClick = (e, rw) => {
     handleViewStoreInventory(rw.id);
-}
+  }
   return (
     <div className="py-6">
-      <Header addNew={openModal} title="Stores List" />
+      {/* Show add new only if user signed in */}
+      {user && <Header addNew={openModal} title="Stores List" />}
       {stores.length > 0 ? (
         <Table data={filteredStores} columns={columns} onRowClick={onRowClick} />
       ) : (

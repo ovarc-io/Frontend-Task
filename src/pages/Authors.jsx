@@ -6,8 +6,11 @@ import { useSearchParams } from 'react-router-dom';
 
 import Modal from '../components/Modal';
 import TableActions from '../components/ActionButton/TableActions';
+import { useAuth } from '../context/AuthContext'; // Adjust the path if needed
 
 const Authors = () => {
+  const { user } = useAuth(); // Get current logged-in user (null if not signed in)
+
   const [authors, setAuthors] = useState([]);
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
@@ -27,7 +30,7 @@ const Authors = () => {
     fetch('/data/authors.json')
       .then((response) => response.json())
       .then((data) => {
-        console.log('Fetched authors:', data);
+      console.log('Fetched authors:', data);
         setAuthors(Array.isArray(data) ? data : [data]);
       })
       .catch((error) => console.error('Error fetching authors:', error));
@@ -44,8 +47,9 @@ const Authors = () => {
     );
   }, [authors, searchTerm]);
 
-  const columns = useMemo(
-    () => [
+  // Define columns conditionally based on user sign in
+  const columns = useMemo(() => {
+    const baseColumns = [
       { header: 'ID', accessorKey: 'id' },
       {
         header: 'Name',
@@ -72,28 +76,34 @@ const Authors = () => {
             `${row.original.first_name} ${row.original.last_name}`
           ),
       },
-      {
+    ];
+
+    if (user) {
+      baseColumns.push({
         header: 'Actions',
         id: 'actions',
         cell: ({ row }) => (
-          <TableActions 
+          <TableActions
             row={row}
             onEdit={
               editingRowId === row.original.id
                 ? handleCancel
                 : () => handleEdit(row.original)
             }
-            onDelete={() => deleteAuthor(row.original.id, row.original.first_name, row.original.last_name)}
+            onDelete={() =>
+              deleteAuthor(row.original.id, row.original.first_name, row.original.last_name)
+            }
           />
         ),
-      },
-    ],
-    [[editingRowId, editName]]
-  );
+      });
+    }
+
+    return baseColumns;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editingRowId, editName, user]);
 
   const deleteAuthor = (id, first_name, last_name) => {
     // show prompt
-
     if (window.confirm(`Are you sure you want to delete ${first_name} ${last_name}?`)) {
       setAuthors((prevAuthors) => prevAuthors.filter((author) => author.id !== id));
       setEditingRowId(null);
@@ -149,21 +159,17 @@ const Authors = () => {
     };
 
     setAuthors((prevAuthors) => [...prevAuthors, newAuthor]);
-    
+
 
     setNewName('');
     closeModal();
   };
 
   return (
-    <div className='py-6'>
-      <Header addNew={openModal} title="Authors List" />
+    <div className="py-6">
+      {user && <Header addNew={openModal} title="Authors List" />}
       {authors.length > 0 ? (
-        <Table
-          data={filteredAuthors}
-          columns={columns}
-         
-        />
+        <Table data={filteredAuthors} columns={columns} />
       ) : (
         <Loading />
       )}

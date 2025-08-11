@@ -1,0 +1,9 @@
+[
+  {"id":1,"author_id":2,"name":"eget tempus vel pede morbi porttitor","isbn":"247489521-3","language":"Northern Sotho","page_count":2532,"format":"paperback","price":29.99},
+  {"id":2,"author_id":20,"name":"eu interdum eu tincidunt in leo maecenas","isbn":"942012386-3","language":"Kashmiri","page_count":257,"format":"hardcover","price":19.95},
+  {"id":3,"author_id":11,"name":"id turpis integer aliquet massa id","isbn":"270878376-9","language":"Afrikaans","page_count":1306,"format":"paperback","price":24.5},
+  {"id":4,"author_id":3,"name":"ultrices posuere cubilia curae duis faucibus accumsan","isbn":"962278849-1","language":"Afrikaans","page_count":4830,"format":"paperback","price":34.75},
+  {"id":5,"author_id":3,"name":"donec","isbn":"628699639-7","language":"Swahili","page_count":8709,"format":"ebook","price":14.99},
+  {"id":6,"author_id":17,"name":"nec euismod scelerisque quam","isbn":"304913246-9","language":"Lao","page_count":4066,"format":"hardcover","price":39.99},
+  {"id":7,"author_id":5,"name":"integer a nibh in quis justo","isbn":"675047068-8","language":"Italian","page_count":7472,"format":"paperback","price":27.0}
+]

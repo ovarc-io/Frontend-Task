@@ -8,24 +8,27 @@ const useLibraryData = ({ storeId = null, searchTerm = '' } = {}) => {
   const [stores, setStores] = useState([]);
   const [inventory, setInventory] = useState([]);
 
+  const useMock = import.meta.env.VITE_USE_MOCK === 'true';
+  const API_BASE_URL = useMock ? import.meta.env.VITE_MOCK_API_URL : import.meta.env.VITE_API_URL;
+
   // Fetch all data
   useEffect(() => {
-    fetch('/data/stores.json')
+    fetch(`${API_BASE_URL}/stores`)
       .then((response) => response.json())
       .then((data) => setStores(Array.isArray(data) ? data : [data]))
       .catch((error) => console.error('Error fetching stores:', error));
 
-    fetch('/data/books.json')
+    fetch(`${API_BASE_URL}/books`)
       .then((response) => response.json())
       .then((data) => setBooks(Array.isArray(data) ? data : [data]))
       .catch((error) => console.error('Error fetching books:', error));
 
-    fetch('/data/authors.json')
+    fetch(`${API_BASE_URL}/authors`)
       .then((response) => response.json())
       .then((data) => setAuthors(Array.isArray(data) ? data : [data]))
       .catch((error) => console.error('Error fetching authors:', error));
 
-    fetch('/data/inventory.json')
+    fetch(`${API_BASE_URL}/inventory`)
       .then((response) => response.json())
       .then((data) => setInventory(Array.isArray(data) ? data : [data]))
       .catch((error) => console.error('Error fetching inventory:', error));

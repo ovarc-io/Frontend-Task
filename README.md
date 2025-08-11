@@ -1,5 +1,9 @@
 # OVARC TASK
 
+## A Simple Bookstore Application
+[10.08.2025 16_30.webm](https://github.com/user-attachments/assets/76569485-09be-4a45-8a5c-e2aa1b88d4b1)
+
+
 ## Tech Stack
 - **Vite**: Fast build tool and dev server.
 - **React Router**: Dynamic routing with code splitting.
@@ -62,5 +66,39 @@ Routes
 - /browse: Browse all books with their authors and store availability.
 
 - /browse-authors: Browse all authors with their published book counts.
+
+## .env File
+
+- after installing run this command: 
+```bash
+json-server --watch db.json --port 4000
+```
+- have in your .env:
+```bash
+VITE_USE_MOCK=true
+VITE_MOCK_API_URL=http://localhost:4000
+VITE_API_URL=http://localhost:xxxx
+```
+
+## Project's Code Review Summary 
+### Repeated Logic:
+Many code blocks and logic are duplicated across components.
+Fix: Extract reusable functions, components, or custom hooks to follow DRY principles.
+
+### Inconsistent Indentation:
+Irregular formatting reduces readability and makes the code harder to follow.
+Fix: Use a code formatter like Prettier to enforce consistent indentation across the project.
+
+### Overuse of Inline Styling:
+Inline classes and styles are heavily used, complicating style management and reuse.
+Fix: Migrate styles to CSS modules, styled-components, or utility-first CSS for modular, maintainable styling.
+
+### Large, Mixed-Responsibility Components:
+Components often handle data fetching, state management, and UI rendering all together, making testing and reuse difficult.
+Fix: Split components into smaller, single-responsibility units (e.g., separate data logic from presentation).
+
+### Naming and Modularity:
+Lack of standardized naming conventions and unclear module boundaries impacts scalability.
+Fix: Adopt consistent naming patterns and organize code into clearly defined modules.
 
 
