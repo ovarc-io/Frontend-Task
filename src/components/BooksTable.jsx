@@ -13,10 +13,13 @@ const BooksTable = ({
   setEditName,
   setBooks,
   deleteBook,
+  showActions = true,
   columnsConfig = ['id', 'name', 'pages', 'author', 'actions'], // Default columns
 }) => {
-  if(prices?.length === 0){
-    columnsConfig = ['id', 'name', 'pages', 'author', 'price', 'actions']
+  if(prices?.length > 0){
+    columnsConfig = showActions ? ['id', 'name', 'pages', 'author', 'price', 'actions'] : ['id', 'name', 'pages', 'author', 'price']
+  } else {
+    columnsConfig = showActions ? columnsConfig : columnsConfig.filter(col => col !== 'actions')
   }
   // Create a lookup map for authors
   const authorMap = useMemo(() => {

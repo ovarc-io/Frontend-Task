@@ -11,6 +11,11 @@ const port = 3000;
 app.use(express.json());
 app.use(cors());
 
+// Test endpoint to verify server is working
+app.get('/api/test', (req, res) => {
+    res.json({ message: 'Server is working', timestamp: new Date().toISOString() });
+});
+
 app.get('/api/data/:file', (req, res) => {
     const file = req.params.file;
     const data = fs.readFileSync(`../public/data/${file}`, 'utf8');
@@ -38,25 +43,38 @@ app.post('/api/data/:storeId/new-book', (req, res) => {
     }
     store.books.push(book);
     fs.writeFileSync(`../public/data/stores.json`, JSON.stringify(storesData, null, 2));
-    res.status(201)
+    res.status(201).json({ message: 'Book added to store successfully' });
 });
 
 
 app.post('/api/sign-in', (req, res) => {
-    const { email, password } = req.body;
-    const users = fs.readFileSync(`../public/data/users.json`, 'utf8');
-    const usersData = JSON.parse(users);
-    const user = usersData.find(user => user.email === email && user.password === password);
-    if(!user) {
-        res.status(401).json({ error: 'Invalid email or password' });
-        return;
+    try {
+        const { email, password } = req.body;
+        
+        // Check if users.json exists
+        const usersPath = `../public/data/users.json`;
+        if (!fs.existsSync(usersPath)) {
+            console.error('Users file not found at:', usersPath);
+            return res.status(500).json({ error: 'Users data not available' });
+        }
+        
+        const users = fs.readFileSync(usersPath, 'utf8');
+        const usersData = JSON.parse(users);
+        const user = usersData.find(user => user.email === email && user.password === password);
+        
+        if(!user) {
+            return res.status(401).json({ error: 'Invalid email or password' });
+        }
+        
+        res.status(200).json(user);
+    } catch (error) {
+        console.error('Sign-in error:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
-    res.status(200).json(user);
 });
 app.post('/api/sign-out', (req, res) => {
     // sign-out logic here 
     res.status(200).json({ message: 'Signed out successfully' });
-    return;
 });
 app.listen(port, () => { 
     console.log(`Server is running on port ${port}`);

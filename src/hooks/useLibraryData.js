@@ -10,22 +10,22 @@ const useLibraryData = ({ storeId = null, searchTerm = '' } = {}) => {
 
   // Fetch all data
   useEffect(() => {
-    fetch(`${config.defaultAPIURL}/stores.json`)
+    fetch(`${config.defaultAPIURL}/data/stores.json`)
       .then((response) => response.json())
       .then((data) => setStores(Array.isArray(data) ? data : [data]))
       .catch((error) => console.error('Error fetching stores:', error));
 
-    fetch(`${config.defaultAPIURL}/books.json`)
+    fetch(`${config.defaultAPIURL}/data/books.json`)
       .then((response) => response.json())
       .then((data) => setBooks(Array.isArray(data) ? data : [data]))
       .catch((error) => console.error('Error fetching books:', error));
 
-    fetch(`${config.defaultAPIURL}/authors.json`)
+    fetch(`${config.defaultAPIURL}/data/authors.json`)
       .then((response) => response.json())
       .then((data) => setAuthors(Array.isArray(data) ? data : [data]))
       .catch((error) => console.error('Error fetching authors:', error));
 
-    fetch(`${config.defaultAPIURL}/inventory.json`)
+    fetch(`${config.defaultAPIURL}/data/inventory.json`)
       .then((response) => response.json())
       .then((data) => setInventory(Array.isArray(data) ? data : [data]))
       .catch((error) => console.error('Error fetching inventory:', error));
