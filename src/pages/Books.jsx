@@ -28,8 +28,8 @@ const Books = () => {
   // Fetch data
   useEffect(() => {
     Promise.all([
-      fetch('/data/books.json').then((response) => response.json()),
-      fetch('/data/authors.json').then((response) => response.json()),
+      fetch(`${config.defaultAPIURL}/books`).then((response) => response.json()),
+      fetch(`${config.defaultAPIURL}/authors`).then((response) => response.json()),
     ])
       .then(([booksData, authorsData]) => {
         setBooks(Array.isArray(booksData) ? booksData : [booksData]);
