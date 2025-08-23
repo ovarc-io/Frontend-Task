@@ -9,7 +9,8 @@ const Modal = (
         title,
         save,
         cancel,
-        children
+        children,
+        isSubmitting = false
     }
 ) => {
     return (
@@ -24,15 +25,17 @@ const Modal = (
                     
                     <button
                         onClick={cancel}
-                        className="text-main border border-main bg-white px-3 py-1.5 rounded"
+                        disabled={isSubmitting}
+                        className="text-main border border-main bg-white px-3 py-1.5 rounded disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         Cancel
                     </button>
                     <button
                         onClick={save}
-                        className="bg-main text-white px-3 py-1.5 rounded"
+                        disabled={isSubmitting}
+                        className="bg-main text-white px-3 py-1.5 rounded disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Submit
+                        {isSubmitting ? 'Adding...' : 'Submit'}
                     </button>
                 </div>
             </div>

@@ -6,9 +6,11 @@ import { useSearchParams } from 'react-router-dom';
 import Modal from '../components/Modal';
 import TableActions from '../components/ActionButton/TableActions';
 import { useNavigate } from 'react-router-dom';
-
+import config from '../config';
+import { useAuth } from '../contexts/AuthContext';
 const Stores = () => {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   
 
   const handleViewStoreInventory = (storeId) => {
@@ -35,7 +37,7 @@ const Stores = () => {
 
   // Fetch stores data
   useEffect(() => {
-    fetch('/data/stores.json')
+    fetch(`${config.defaultAPIURL}/data/stores.json`)
       .then((response) => response.json())
       .then((data) => {
         console.log('Fetched stores:', data);
@@ -63,46 +65,53 @@ const Stores = () => {
 
   // Define table columns
   const columns = useMemo(
-    () => [
-      { header: 'Store Id', accessorKey: 'id' },
-      {
-        header: 'Name',
-        accessorKey: 'name',
-        cell: ({ row }) =>
-          editingRowId === row.original.id ? (
-            <input
-              type="text"
-              value={editName}
-              onChange={(e) => setEditName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleSave(row.original.id);
-                if (e.key === 'Escape') handleCancel();
-              }}
-              className="border border-gray-300 rounded p-1 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-              autoFocus
-            />
-          ) : (
-            row.original.name
-          ),
-      },
-      { header: 'Address', accessorKey: 'full_address' },
-      {
-        header: 'Actions',
-        id: 'actions',
-        cell: ({ row }) => (
-          <TableActions
-            row={row}
-            onEdit={
-              editingRowId === row.original.id
-                ? handleCancel
-                : () => handleEdit(row.original)
+    () => {
+      const baseColumns = [
+        { header: 'Store Id', accessorKey: 'id' },
+        {
+          header: 'Name',
+          accessorKey: 'name',
+          cell: ({ row }) =>
+            editingRowId === row.original.id ? (
+              <input
+                type="text"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleSave(row.original.id);
+                  if (e.key === 'Escape') handleCancel();
+                }}
+                className="border border-gray-300 rounded p-1 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                autoFocus
+              />
+            ) : (
+              row.original.name
+            ),
+        },
+        { header: 'Address', accessorKey: 'full_address' },
+      ];
+
+      if (isAuthenticated()) {
+        baseColumns.push({
+          header: 'Actions',
+          id: 'actions',
+          cell: ({ row }) => (
+            <TableActions
+              row={row}
+              onEdit={
+                editingRowId === row.original.id
+                  ? handleCancel
+                  : () => handleEdit(row.original)
             }
-            onDelete={() => deleteStore(row.original.id, row.original.name)}
-          />
-        ),
-      },
-    ],
-    [editingRowId, editName]
+              onDelete={() => deleteStore(row.original.id, row.original.name)}
+            />
+          ),
+        });
+      }
+
+      return baseColumns;
+    },
+    [editingRowId, editName, isAuthenticated]
   );
 
   // Handle store deletion
@@ -220,7 +229,11 @@ const Stores = () => {
 }
   return (
     <div className="py-6">
-      <Header addNew={openModal} title="Stores List" />
+      <Header 
+        addNew={isAuthenticated() ? openModal : null} 
+        title="Stores List" 
+        buttonTitle={isAuthenticated() ? "Add New Store" : null}
+      />
       {stores.length > 0 ? (
         <Table data={filteredStores} columns={columns} onRowClick={onRowClick} />
       ) : (

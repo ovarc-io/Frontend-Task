@@ -6,8 +6,10 @@ import { useSearchParams } from 'react-router-dom';
 
 import Modal from '../components/Modal';
 import TableActions from '../components/ActionButton/TableActions';
-
+import config from '../config';
+import { useAuth } from '../contexts/AuthContext';
 const Authors = () => {
+  const { isAuthenticated } = useAuth();
   const [authors, setAuthors] = useState([]);
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
@@ -24,7 +26,7 @@ const Authors = () => {
 
   // Fetch JSON data
   useEffect(() => {
-    fetch('/data/authors.json')
+    fetch(`${config.defaultAPIURL}/data/authors.json`)
       .then((response) => response.json())
       .then((data) => {
         console.log('Fetched authors:', data);
@@ -45,50 +47,57 @@ const Authors = () => {
   }, [authors, searchTerm]);
 
   const columns = useMemo(
-    () => [
-      { header: 'ID', accessorKey: 'id' },
-      {
-        header: 'Name',
-        accessorFn: (row) => `${row.first_name} ${row.last_name}`,
-        id: 'name',
-        cell: ({ row }) =>
-          editingRowId === row.original.id ? (
-            <input
-              type="text"
-              value={editName}
-              onChange={(e) => setEditName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleSave(row.original.id);
-                } else if (e.key === 'Escape') {
-                  handleCancel();
-                }
-              }}
-              className="border border-gray-300 rounded p-1 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-              autoFocus
-              tooltip="Enter to save"
+    () => {
+      const baseColumns = [
+        { header: 'ID', accessorKey: 'id' },
+        {
+          header: 'Name',
+          accessorFn: (row) => `${row.first_name} ${row.last_name}`,
+          id: 'name',
+          cell: ({ row }) =>
+            editingRowId === row.original.id ? (
+              <input
+                type="text"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSave(row.original.id);
+                  } else if (e.key === 'Escape') {
+                    handleCancel();
+                  }
+                }}
+                className="border border-gray-300 rounded p-1 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                autoFocus
+                tooltip="Enter to save"
+              />
+            ) : (
+              `${row.original.first_name} ${row.original.last_name}`
+            ),
+        },
+      ];
+
+      if (isAuthenticated()) {
+        baseColumns.push({
+          header: 'Actions',
+          id: 'actions',
+          cell: ({ row }) => (
+            <TableActions 
+              row={row}
+              onEdit={
+                editingRowId === row.original.id
+                  ? handleCancel
+                  : () => handleEdit(row.original)
+              }
+              onDelete={() => deleteAuthor(row.original.id, row.original.first_name, row.original.last_name)}
             />
-          ) : (
-            `${row.original.first_name} ${row.original.last_name}`
           ),
-      },
-      {
-        header: 'Actions',
-        id: 'actions',
-        cell: ({ row }) => (
-          <TableActions 
-            row={row}
-            onEdit={
-              editingRowId === row.original.id
-                ? handleCancel
-                : () => handleEdit(row.original)
-            }
-            onDelete={() => deleteAuthor(row.original.id, row.original.first_name, row.original.last_name)}
-          />
-        ),
-      },
-    ],
-    [[editingRowId, editName]]
+        });
+      }
+
+      return baseColumns;
+    },
+    [editingRowId, editName, isAuthenticated]
   );
 
   const deleteAuthor = (id, first_name, last_name) => {
@@ -157,7 +166,11 @@ const Authors = () => {
 
   return (
     <div className='py-6'>
-      <Header addNew={openModal} title="Authors List" />
+      <Header 
+        addNew={isAuthenticated() ? openModal : null} 
+        title="Authors List" 
+        buttonTitle={isAuthenticated() ? "Add New Author" : null}
+      />
       {authors.length > 0 ? (
         <Table
           data={filteredAuthors}

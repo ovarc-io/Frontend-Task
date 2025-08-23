@@ -4,8 +4,11 @@ import Loading from './Loading';
 import BooksTable from '../components/BooksTable';
 import { useSearchParams } from 'react-router-dom';
 import Modal from '../components/Modal';
+import config from '../config';
+import { useAuth } from '../contexts/AuthContext';
 
 const Books = () => {
+  const { isAuthenticated } = useAuth();
   const [books, setBooks] = useState([]);
   const [authors, setAuthors] = useState([]);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -28,8 +31,8 @@ const Books = () => {
   // Fetch data
   useEffect(() => {
     Promise.all([
-      fetch('/data/books.json').then((response) => response.json()),
-      fetch('/data/authors.json').then((response) => response.json()),
+      fetch(`${config.defaultAPIURL}/data/books.json`).then((response) => response.json()),
+      fetch(`${config.defaultAPIURL}/data/authors.json`).then((response) => response.json()),
     ])
       .then(([booksData, authorsData]) => {
         setBooks(Array.isArray(booksData) ? booksData : [booksData]);
@@ -77,7 +80,11 @@ const Books = () => {
 
   return (
     <div className="py-6">
-      <Header addNew={() => setShowModal(true)} title="Books List" />
+      <Header 
+        addNew={isAuthenticated() ? () => setShowModal(true) : null} 
+        title="Books List" 
+        buttonTitle={isAuthenticated() ? "Add New Book" : null}
+      />
       {books.length > 0 ? (
         <BooksTable
           books={filteredBooks}
@@ -88,6 +95,7 @@ const Books = () => {
           setEditName={setEditName}
           setBooks={setBooks}
           deleteBook={deleteBook}
+          showActions={isAuthenticated()}
         />
       ) : (
         <Loading />
