@@ -2,11 +2,45 @@
 import { useEffect, useState } from 'react';
 import Modal from '../components/Modal';
 import Header from '../components/Header';
-
+import BooksTable from '../components/BooksTable';
+import config from '../config';
+import { useParams } from 'react-router-dom';
 const Inventory = () => {
   // State for UI
   const [activeTab, setActiveTab] = useState('books');
   const [showModal, setShowModal] = useState(false);
+  const [books, setBooks] = useState([]);
+  const [authors, setAuthors] = useState([]);
+  const [editingRowId, setEditingRowId] = useState(null);
+  const [editName, setEditName] = useState('');
+  const [deleteBook, setDeleteBook] = useState(null);
+  const [inventory, setInventory] = useState([]);
+  const [prices, setPrices] = useState([]);
+  const { storeId } = useParams();
+
+  useEffect(() => {
+    const fetchData = async () => {
+    const inventoryResponse = await fetch(`${config.defaultAPIURL}/inventory.json`)
+    const inventory = await inventoryResponse.json()
+    const storeInventory = inventory.filter(item => item.store_id == storeId)
+    const storebooklist = storeInventory.map((item)=> item.book_id )
+    const booksResponse = await fetch(`${config.defaultAPIURL}/books.json`)
+    const books = await booksResponse.json()
+    const authorsResponse = await fetch(`${config.defaultAPIURL}/authors.json`)
+    const authors = await authorsResponse.json()
+    const storeBooks = books.filter((item)=> storebooklist.includes(item.id))
+    const prices = storeInventory.map((item)=> item.price)
+    setBooks(storeBooks)
+    setAuthors(authors)
+    setPrices(prices)
+    };
+    fetchData();
+
+    fetch(`${config.defaultAPIURL}/books.json`)
+      .then((response) => response.json())
+      .then((data) => setBooks(data));
+  }, []);
+
 
   // Set active tab based on view query param
   const view = 'books';
@@ -42,9 +76,25 @@ const Inventory = () => {
       <Header addNew={openModal} title={`Store Inventory`} buttonTitle="Add to inventory" />
 
       {activeTab === 'books' ? (
+        <div>
+          <BooksTable
+            books={books}
+            authors={authors}
+            prices={prices}
+            editingRowId={editingRowId}
+            setEditingRowId={setEditingRowId}
+            editName={editName}
+            setEditName={setEditName}
+            setBooks={setBooks}
+            deleteBook={deleteBook}
+
+          />  
           <p className="text-gray-600">No books found in this store.</p>
+        </div>
       ) : (
+        <div>
           <p className="text-gray-600">No authors with books in this store.</p>
+        </div>
       )}
 
       <Modal

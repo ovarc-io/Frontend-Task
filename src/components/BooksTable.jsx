@@ -6,6 +6,7 @@ import TableActions from './ActionButton/TableActions';
 const BooksTable = ({
   books,
   authors,
+  prices,
   editingRowId,
   setEditingRowId,
   editName,
@@ -14,6 +15,9 @@ const BooksTable = ({
   deleteBook,
   columnsConfig = ['id', 'name', 'pages', 'author', 'actions'], // Default columns
 }) => {
+  if(prices?.length === 0){
+    columnsConfig = ['id', 'name', 'pages', 'author', 'price', 'actions']
+  }
   // Create a lookup map for authors
   const authorMap = useMemo(() => {
     return authors.reduce((map, author) => {
@@ -21,14 +25,20 @@ const BooksTable = ({
       return map;
     }, {});
   }, [authors]);
-
+  const priceMap = useMemo(() => {
+    return prices?.reduce((map, price,index) => {
+      map[index] = price;
+      return map;
+    }, {});
+  }, [prices]);
   // Enrich books with author names
   const enrichedBooks = useMemo(() => {
-    return books.map((book) => ({
+    return books.map((book,index) => ({
       ...book,
       author_name: authorMap[book.author_id] || 'Unknown Author',
+      price: priceMap?.[index] || 'Unknown Price',
     }));
-  }, [books, authorMap]);
+  }, [books, authorMap, priceMap]);
 
   // Define all possible columns
   const allColumns = useMemo(
