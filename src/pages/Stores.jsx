@@ -6,7 +6,7 @@ import { useSearchParams } from 'react-router-dom';
 import Modal from '../components/Modal';
 import TableActions from '../components/ActionButton/TableActions';
 import { useNavigate } from 'react-router-dom';
-
+import config from '../config';
 const Stores = () => {
   const navigate = useNavigate();
   
@@ -35,7 +35,7 @@ const Stores = () => {
 
   // Fetch stores data
   useEffect(() => {
-    fetch('/data/stores.json')
+    fetch(`${config.defaultAPIURL}/stores.json`)
       .then((response) => response.json())
       .then((data) => {
         console.log('Fetched stores:', data);

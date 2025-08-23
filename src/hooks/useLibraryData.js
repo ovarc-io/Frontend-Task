@@ -1,6 +1,6 @@
 // src/hooks/useLibraryData.js
 import { useEffect, useState, useMemo } from 'react';
-
+import config from '../config';
 const useLibraryData = ({ storeId = null, searchTerm = '' } = {}) => {
   // State for data
   const [books, setBooks] = useState([]);
@@ -10,22 +10,22 @@ const useLibraryData = ({ storeId = null, searchTerm = '' } = {}) => {
 
   // Fetch all data
   useEffect(() => {
-    fetch('/data/stores.json')
+    fetch(`${config.defaultAPIURL}/stores.json`)
       .then((response) => response.json())
       .then((data) => setStores(Array.isArray(data) ? data : [data]))
       .catch((error) => console.error('Error fetching stores:', error));
 
-    fetch('/data/books.json')
+    fetch(`${config.defaultAPIURL}/books.json`)
       .then((response) => response.json())
       .then((data) => setBooks(Array.isArray(data) ? data : [data]))
       .catch((error) => console.error('Error fetching books:', error));
 
-    fetch('/data/authors.json')
+    fetch(`${config.defaultAPIURL}/authors.json`)
       .then((response) => response.json())
       .then((data) => setAuthors(Array.isArray(data) ? data : [data]))
       .catch((error) => console.error('Error fetching authors:', error));
 
-    fetch('/data/inventory.json')
+    fetch(`${config.defaultAPIURL}/inventory.json`)
       .then((response) => response.json())
       .then((data) => setInventory(Array.isArray(data) ? data : [data]))
       .catch((error) => console.error('Error fetching inventory:', error));

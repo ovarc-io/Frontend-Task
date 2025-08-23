@@ -1,13 +1,15 @@
 // create api to serve json files from public/data folder using express.js
 import express from 'express';
 import fs from 'fs';
+import cors from 'cors';
+
 
 const app = express();
 const port = 3000;
 
 // Middleware setup
 app.use(express.json());
-
+app.use(cors());
 
 app.get('/api/data/:file', (req, res) => {
     const file = req.params.file;
